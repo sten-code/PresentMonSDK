@@ -45,9 +45,9 @@ add_custom_target(generate_build_id DEPENDS ${PROJECT_SOURCE_DIR}/IntelPresentMo
 add_dependencies(${PROJECT_NAME} generate_enum_metric generate_build_id)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-        boost_asio
-        boost_process
-        boost_interprocess
+        Boost::asio
+        Boost::process
+        Boost::interprocess
         CLI11::CLI11
         cereal::cereal
         unofficial::concurrentqueue::concurrentqueue
