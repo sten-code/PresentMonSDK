@@ -124,7 +124,7 @@ void PrintPresentResult(PresentResult value)
     default:                       wprintf(L"Unknown (%u)", value); assert(false); break;
     }
 }
-void PrintPresentHistoryModel(uint32_t model)
+void PrintPresentHistoryModel(Microsoft_Windows_DxgKrnl::PresentModel model)
 {
     using namespace Microsoft_Windows_DxgKrnl;
     switch (model) {
@@ -141,7 +141,7 @@ void PrintPresentHistoryModel(uint32_t model)
     default:                                             wprintf(L"Unknown (%u)", model); assert(false); break;
     }
 }
-void PrintQueuePacketType(uint32_t type)
+void PrintQueuePacketType(Microsoft_Windows_DxgKrnl::QueuePacketType type)
 {
     using namespace Microsoft_Windows_DxgKrnl;
     switch (type) {
@@ -157,7 +157,7 @@ void PrintQueuePacketType(uint32_t type)
     default:                                               wprintf(L"Unknown (%u)", type); assert(false); break;
     }
 }
-void PrintDmaPacketType(uint32_t type)
+void PrintDmaPacketType(Microsoft_Windows_DxgKrnl::DmaPacketType type)
 {
     using namespace Microsoft_Windows_DxgKrnl;
     switch (type) {
@@ -197,7 +197,7 @@ void PrintFrameType(FrameType type)
     default:                     wprintf(L"Unknown (%u)", type); assert(false); break;
     }
 }
-void PrintInputType(uint32_t type)
+void PrintInputType(Intel_PresentMon::InputType type)
 {
     using namespace Intel_PresentMon;
     switch (type) {
@@ -239,11 +239,11 @@ void PrintEventHeader(EVENT_RECORD* eventRecord, EventMetadata* metadata, char c
         else if (propFunc == PrintWString)             PrintWString(metadata->GetEventData<std::wstring>(eventRecord, propName));
         else if (propFunc == PrintTime)                PrintTime(metadata->GetEventData<uint64_t>(eventRecord, propName));
         else if (propFunc == PrintTimeDelta)           PrintTimeDelta(metadata->GetEventData<uint64_t>(eventRecord, propName));
-        else if (propFunc == PrintQueuePacketType)     PrintQueuePacketType(metadata->GetEventData<uint32_t>(eventRecord, propName));
-        else if (propFunc == PrintDmaPacketType)       PrintDmaPacketType(metadata->GetEventData<uint32_t>(eventRecord, propName));
+        else if (propFunc == PrintQueuePacketType)     PrintQueuePacketType(metadata->GetEventData<Microsoft_Windows_DxgKrnl::QueuePacketType>(eventRecord, propName));
+        else if (propFunc == PrintDmaPacketType)       PrintDmaPacketType(metadata->GetEventData<Microsoft_Windows_DxgKrnl::DmaPacketType>(eventRecord, propName));
         else if (propFunc == PrintPresentFlags)        PrintPresentFlags(metadata->GetEventData<uint32_t>(eventRecord, propName));
-        else if (propFunc == PrintPresentHistoryModel) PrintPresentHistoryModel(metadata->GetEventData<uint32_t>(eventRecord, propName));
-        else if (propFunc == PrintInputType)           PrintInputType(metadata->GetEventData<uint8_t>(eventRecord, propName));
+        else if (propFunc == PrintPresentHistoryModel) PrintPresentHistoryModel(metadata->GetEventData<Microsoft_Windows_DxgKrnl::PresentModel>(eventRecord, propName));
+        else if (propFunc == PrintInputType)           PrintInputType(metadata->GetEventData<Intel_PresentMon::InputType>(eventRecord, propName));
         else assert(false);
     }
     wprintf(L"\n");
@@ -415,8 +415,8 @@ void VerboseTraceEventImpl(PMTraceConsumer* pmConsumer, EVENT_RECORD* eventRecor
     if (hdr.ProviderId == Microsoft_Windows_DXGI::GUID) {
         using namespace Microsoft_Windows_DXGI;
         switch (hdr.EventDescriptor.Id) {
-        case Present_Start::Id:                  PrintEventHeader(eventRecord, metadata, "DXGIPresent_Start",    { L"Flags", PrintPresentFlags, }); break;
-        case PresentMultiplaneOverlay_Start::Id: PrintEventHeader(eventRecord, metadata, "DXGIPresentMPO_Start", { L"Flags", PrintPresentFlags, }); break;
+        case Present_Start::Id:                  PrintEventHeader(eventRecord, metadata, "DXGIPresent_Start",    { (void*)L"Flags", PrintPresentFlags, }); break;
+        case PresentMultiplaneOverlay_Start::Id: PrintEventHeader(eventRecord, metadata, "DXGIPresentMPO_Start", { (void*)L"Flags", PrintPresentFlags, }); break;
         case Present_Stop::Id:                   PrintEventHeader(hdr, "DXGIPresent_Stop"); break;
         case PresentMultiplaneOverlay_Stop::Id:  PrintEventHeader(hdr, "DXGIPresentMPO_Stop"); break;
         }
@@ -434,32 +434,32 @@ void VerboseTraceEventImpl(PMTraceConsumer* pmConsumer, EVENT_RECORD* eventRecor
         using namespace Microsoft_Windows_DxgKrnl;
         if (pmConsumer->mTrackDisplay) {
             switch (hdr.EventDescriptor.Id) {
-            case Blit_Info::Id:                    PrintEventHeader(eventRecord, metadata, "Blit_Info",                    { L"hwnd",               PrintU64x,
-                                                                                                                             L"bRedirectedPresent", PrintU32 }); break;
+            case Blit_Info::Id:                    PrintEventHeader(eventRecord, metadata, "Blit_Info",                    { (void*)L"hwnd",               PrintU64x,
+                                                                                                                             (void*)L"bRedirectedPresent", PrintU32 }); break;
             case BlitCancel_Info::Id:              PrintEventHeader(hdr, "BlitCancel_Info"); break;
-            case FlipMultiPlaneOverlay_Info::Id:   PrintEventHeader(eventRecord, metadata, "FlipMultiPlaneOverlay_Info",   { L"VidPnSourceId",      PrintU32,
-                                                                                                                             L"LayerIndex",         PrintU32 }); break;
+            case FlipMultiPlaneOverlay_Info::Id:   PrintEventHeader(eventRecord, metadata, "FlipMultiPlaneOverlay_Info",   { (void*)L"VidPnSourceId",      PrintU32,
+                                                                                                                             (void*)L"LayerIndex",         PrintU32 }); break;
             case Present_Info::Id:                 PrintEventHeader(hdr, "DxgKrnl_Present_Info"); break;
 
-            case MMIOFlip_Info::Id:                PrintEventHeader(eventRecord, metadata, "MMIOFlip_Info",                { L"FlipSubmitSequence", PrintU64, }); break;
-            case Flip_Info::Id:                    PrintEventHeader(eventRecord, metadata, "Flip_Info",                    { L"FlipInterval",       PrintU32,
-                                                                                                                             L"MMIOFlip",           PrintBool, }); break;
-            case IndependentFlip_Info::Id:         PrintEventHeader(eventRecord, metadata, "IndependentFlip_Info",         { L"SubmitSequence",     PrintU32,
-                                                                                                                             L"FlipInterval",       PrintU32, }); break;
-            case PresentHistory_Start::Id:         PrintEventHeader(eventRecord, metadata, "PresentHistory_Start",         { L"Token",              PrintU64x,
-                                                                                                                             L"Model",              PrintPresentHistoryModel, }); break;
-            case PresentHistory_Info::Id:          PrintEventHeader(eventRecord, metadata, "PresentHistory_Info",          { L"Token",              PrintU64x,
-                                                                                                                             L"Model",              PrintPresentHistoryModel, }); break;
-            case PresentHistoryDetailed_Start::Id: PrintEventHeader(eventRecord, metadata, "PresentHistoryDetailed_Start", { L"Token",              PrintU64x,
-                                                                                                                             L"Model",              PrintPresentHistoryModel, }); break;
-            case QueuePacket_Start::Id:            PrintEventHeader(eventRecord, metadata, "QueuePacket_Start",            { L"hContext",           PrintU64x,
-                                                                                                                             L"SubmitSequence",     PrintU32,
-                                                                                                                             L"PacketType",         PrintQueuePacketType,
-                                                                                                                             L"bPresent",           PrintU32, }); break;
-            case QueuePacket_Start_2::Id:          PrintEventHeader(eventRecord, metadata, "QueuePacket_Start WAIT",       { L"hContext",           PrintU64x,
-                                                                                                                             L"SubmitSequence",     PrintU32, }); break;
-            case QueuePacket_Stop::Id:             PrintEventHeader(eventRecord, metadata, "QueuePacket_Stop",             { L"hContext",           PrintU64x,
-                                                                                                                             L"SubmitSequence",     PrintU32, }); break;
+            case MMIOFlip_Info::Id:                PrintEventHeader(eventRecord, metadata, "MMIOFlip_Info",                { (void*)L"FlipSubmitSequence", PrintU64, }); break;
+            case Flip_Info::Id:                    PrintEventHeader(eventRecord, metadata, "Flip_Info",                    { (void*)L"FlipInterval",       PrintU32,
+                                                                                                                             (void*)L"MMIOFlip",           PrintBool, }); break;
+            case IndependentFlip_Info::Id:         PrintEventHeader(eventRecord, metadata, "IndependentFlip_Info",         { (void*)L"SubmitSequence",     PrintU32,
+                                                                                                                             (void*)L"FlipInterval",       PrintU32, }); break;
+            case PresentHistory_Start::Id:         PrintEventHeader(eventRecord, metadata, "PresentHistory_Start",         { (void*)L"Token",              PrintU64x,
+                                                                                                                             (void*)L"Model",              PrintPresentHistoryModel, }); break;
+            case PresentHistory_Info::Id:          PrintEventHeader(eventRecord, metadata, "PresentHistory_Info",          { (void*)L"Token",              PrintU64x,
+                                                                                                                             (void*)L"Model",              PrintPresentHistoryModel, }); break;
+            case PresentHistoryDetailed_Start::Id: PrintEventHeader(eventRecord, metadata, "PresentHistoryDetailed_Start", {(void*) L"Token",              PrintU64x,
+                                                                                                                             (void*)L"Model",              PrintPresentHistoryModel, }); break;
+            case QueuePacket_Start::Id:            PrintEventHeader(eventRecord, metadata, "QueuePacket_Start",            { (void*)L"hContext",           PrintU64x,
+                                                                                                                             (void*)L"SubmitSequence",     PrintU32,
+                                                                                                                             (void*)L"PacketType",         PrintQueuePacketType,
+                                                                                                                             (void*)L"bPresent",           PrintU32, }); break;
+            case QueuePacket_Start_2::Id:          PrintEventHeader(eventRecord, metadata, "QueuePacket_Start WAIT",       { (void*)L"hContext",           PrintU64x,
+                                                                                                                             (void*)L"SubmitSequence",     PrintU32, }); break;
+            case QueuePacket_Stop::Id:             PrintEventHeader(eventRecord, metadata, "QueuePacket_Stop",             { (void*)L"hContext",           PrintU64x,
+                                                                                                                             (void*)L"SubmitSequence",     PrintU32, }); break;
             case VSyncDPC_Info::Id: {
                 auto FlipFenceId = metadata->GetEventData<uint64_t>(eventRecord, L"FlipFenceId");
                 PrintEventHeader(hdr);
@@ -497,7 +497,7 @@ void VerboseTraceEventImpl(PMTraceConsumer* pmConsumer, EVENT_RECORD* eventRecor
                     FlipSubmitSequence >> 32,
                     FlipSubmitSequence & 0xffffffffll);
                 if (hdr.EventDescriptor.Version >= 2) {
-                    switch (metadata->GetEventData<uint32_t>(eventRecord, L"FlipEntryStatusAfterFlip")) {
+                    switch (metadata->GetEventData<FlipEntryStatus>(eventRecord, L"FlipEntryStatusAfterFlip")) {
                     case FlipEntryStatus::FlipWaitVSync:    wprintf(L" FlipWaitVSync"); break;
                     case FlipEntryStatus::FlipWaitComplete: wprintf(L" FlipWaitComplete"); break;
                     case FlipEntryStatus::FlipWaitHSync:    wprintf(L" FlipWaitHSync"); break;
@@ -511,23 +511,23 @@ void VerboseTraceEventImpl(PMTraceConsumer* pmConsumer, EVENT_RECORD* eventRecor
         if (pmConsumer->mTrackGPU) {
             switch (hdr.EventDescriptor.Id) {
             case Context_DCStart::Id:
-            case Context_Start::Id:   PrintEventHeader(eventRecord, metadata, "Context_Start",   { L"hContext",              PrintU64x,
-                                                                                                   L"hDevice",               PrintU64x,
-                                                                                                   L"NodeOrdinal",           PrintU32, }); break;
-            case Context_Stop::Id:    PrintEventHeader(eventRecord, metadata, "Context_Stop",    { L"hContext",              PrintU64x, }); break;
+            case Context_Start::Id:   PrintEventHeader(eventRecord, metadata, "Context_Start",   { (void*)L"hContext",              PrintU64x,
+                                                                                                   (void*)L"hDevice",               PrintU64x,
+                                                                                                   (void*)L"NodeOrdinal",           PrintU32, }); break;
+            case Context_Stop::Id:    PrintEventHeader(eventRecord, metadata, "Context_Stop",    { (void*)L"hContext",              PrintU64x, }); break;
             case Device_DCStart::Id:
-            case Device_Start::Id:    PrintEventHeader(eventRecord, metadata, "Device_Start",    { L"hDevice",               PrintU64x,
-                                                                                                   L"pDxgAdapter",           PrintU64x, }); break;
-            case Device_Stop::Id:     PrintEventHeader(eventRecord, metadata, "Device_Stop",     { L"hDevice",               PrintU64x, }); break;
+            case Device_Start::Id:    PrintEventHeader(eventRecord, metadata, "Device_Start",    { (void*)L"hDevice",               PrintU64x,
+                                                                                                   (void*)L"pDxgAdapter",           PrintU64x, }); break;
+            case Device_Stop::Id:     PrintEventHeader(eventRecord, metadata, "Device_Stop",     { (void*)L"hDevice",               PrintU64x, }); break;
             case HwQueue_DCStart::Id:
-            case HwQueue_Start::Id:   PrintEventHeader(eventRecord, metadata, "HwQueue_Start",   { L"hContext",              PrintU64x,
-                                                                                                   L"hHwQueue",              PrintU64x,
-                                                                                                   L"ParentDxgHwQueue",      PrintU64x, }); break;
-            case DmaPacket_Info::Id:  PrintEventHeader(eventRecord, metadata, "DmaPacket_Info",  { L"hContext",              PrintU64x,
-                                                                                                   L"ulQueueSubmitSequence", PrintU32,
-                                                                                                   L"PacketType",            PrintDmaPacketType, }); break;
-            case DmaPacket_Start::Id: PrintEventHeader(eventRecord, metadata, "DmaPacket_Start", { L"hContext",              PrintU64x,
-                                                                                                   L"ulQueueSubmitSequence", PrintU32, }); break;
+            case HwQueue_Start::Id:   PrintEventHeader(eventRecord, metadata, "HwQueue_Start",   { (void*)L"hContext",              PrintU64x,
+                                                                                                   (void*)L"hHwQueue",              PrintU64x,
+                                                                                                   (void*)L"ParentDxgHwQueue",      PrintU64x, }); break;
+            case DmaPacket_Info::Id:  PrintEventHeader(eventRecord, metadata, "DmaPacket_Info",  { (void*)L"hContext",              PrintU64x,
+                                                                                                   (void*)L"ulQueueSubmitSequence", PrintU32,
+                                                                                                   (void*)L"PacketType",            PrintDmaPacketType, }); break;
+            case DmaPacket_Start::Id: PrintEventHeader(eventRecord, metadata, "DmaPacket_Start", { (void*)L"hContext",              PrintU64x,
+                                                                                                   (void*)L"ulQueueSubmitSequence", PrintU32, }); break;
             }
         }
         if (pmConsumer->mTrackFrameType &&
@@ -594,8 +594,8 @@ void VerboseTraceEventImpl(PMTraceConsumer* pmConsumer, EVENT_RECORD* eventRecor
     if (hdr.ProviderId == Microsoft_Windows_Kernel_Process::GUID) {
         using namespace Microsoft_Windows_Kernel_Process;
         switch (hdr.EventDescriptor.Id) {
-        case ProcessStart_Start::Id: PrintEventHeader(eventRecord, metadata, "ProcessStart", { L"ProcessID", PrintU32, L"ImageName", PrintWString }); break;
-        case ProcessStop_Stop::Id:   PrintEventHeader(eventRecord, metadata, "ProcessStop",  { L"ProcessID", PrintU32, L"ImageName", PrintString }); break;
+        case ProcessStart_Start::Id: PrintEventHeader(eventRecord, metadata, "ProcessStart", { (void*)L"ProcessID", PrintU32, (void*)L"ImageName", PrintWString }); break;
+        case ProcessStop_Stop::Id:   PrintEventHeader(eventRecord, metadata, "ProcessStop",  { (void*)L"ProcessID", PrintU32, (void*)L"ImageName", PrintString }); break;
         }
         return;
     }
@@ -616,7 +616,7 @@ void VerboseTraceEventImpl(PMTraceConsumer* pmConsumer, EVENT_RECORD* eventRecor
                 auto CompositionSurfaceLuid = desc[0].GetData<uint64_t>();
                 auto PresentCount           = desc[1].GetData<uint32_t>();
                 auto BindId                 = desc[2].GetData<uint64_t>();
-                auto NewState               = desc[3].GetData<uint32_t>();
+                auto NewState               = desc[3].GetData<TokenState>();
 
                 PrintEventHeader(hdr);
                 wprintf(L"Win32K_TokenStateChanged");
@@ -643,9 +643,9 @@ void VerboseTraceEventImpl(PMTraceConsumer* pmConsumer, EVENT_RECORD* eventRecor
         }
         if (pmConsumer->mTrackInput) {
             switch (hdr.EventDescriptor.Id) {
-            case InputDeviceRead_Stop::Id:      PrintEventHeader(eventRecord, metadata, "Win32k_InputDeviceRead_Stop", { L"DeviceType", PrintU32,  }); break;
-            case RetrieveInputMessage_Info::Id: PrintEventHeader(eventRecord, metadata, "Win32k_RetrieveInputMessage", { L"flags", PrintU32, L"hwnd", PrintU64x}); break;
-            case OnInputXformUpdate_Info::Id:   PrintEventHeader(eventRecord, metadata, "Win32k_OnInputXformUpdate",   { L"Hwnd", PrintU64x, L"XformQPCTime", PrintU64}); break;
+            case InputDeviceRead_Stop::Id:      PrintEventHeader(eventRecord, metadata, "Win32k_InputDeviceRead_Stop", { (void*)L"DeviceType", PrintU32,  }); break;
+            case RetrieveInputMessage_Info::Id: PrintEventHeader(eventRecord, metadata, "Win32k_RetrieveInputMessage", { (void*)L"flags", PrintU32, (void*)L"hwnd", PrintU64x}); break;
+            case OnInputXformUpdate_Info::Id:   PrintEventHeader(eventRecord, metadata, "Win32k_OnInputXformUpdate",   { (void*)L"Hwnd", PrintU64x, (void*)L"XformQPCTime", PrintU64}); break;
             }
         }
         return;
@@ -679,10 +679,10 @@ void VerboseTraceEventImpl(PMTraceConsumer* pmConsumer, EVENT_RECORD* eventRecor
         if (pmConsumer->mTrackPMMeasurements) {
             switch (hdr.EventDescriptor.Id) {
             case MeasuredInput_Info::Id:
-                PrintEventHeader(eventRecord, metadata, "PM_Measurement_Input", { L"InputType", PrintInputType, L"Time", PrintU64x });
+                PrintEventHeader(eventRecord, metadata, "PM_Measurement_Input", { (void*)L"InputType", PrintInputType, (void*)L"Time", PrintU64x });
                 break;
             case MeasuredScreenChange_Info::Id:
-                PrintEventHeader(eventRecord, metadata, "PM_Measurement_ScreenChange", { L"Time", PrintU64x });
+                PrintEventHeader(eventRecord, metadata, "PM_Measurement_ScreenChange", { (void*)L"Time", PrintU64x });
                 break;
             }
             return;
@@ -692,48 +692,48 @@ void VerboseTraceEventImpl(PMTraceConsumer* pmConsumer, EVENT_RECORD* eventRecor
             switch (hdr.EventDescriptor.Id) {
             case Intel_PresentMon::AppSleepStart_Info::Id: {
                 DebugAssert(eventRecord->UserDataLength == sizeof(Intel_PresentMon::AppSleepStart_Info_Props));
-                PrintEventHeader(eventRecord, metadata, "PM_AppSleepStart", { L"FrameId", PrintU32 });
+                PrintEventHeader(eventRecord, metadata, "PM_AppSleepStart", { (void*)L"FrameId", PrintU32 });
             }
             return;
             case Intel_PresentMon::AppSleepEnd_Info::Id: {
                 DebugAssert(eventRecord->UserDataLength == sizeof(Intel_PresentMon::AppSleepEnd_Info_Props));
-                PrintEventHeader(eventRecord, metadata, "PM_AppSleepEnd", { L"FrameId", PrintU32 });
+                PrintEventHeader(eventRecord, metadata, "PM_AppSleepEnd", { (void*)L"FrameId", PrintU32 });
             }
             return;
             case Intel_PresentMon::AppSimulationStart_Info::Id: {
                 DebugAssert(eventRecord->UserDataLength == sizeof(Intel_PresentMon::AppSimulationStart_Info_Props));
-                PrintEventHeader(eventRecord, metadata, "PM_AppSimulationStart", { L"FrameId", PrintU32 });
+                PrintEventHeader(eventRecord, metadata, "PM_AppSimulationStart", { (void*)L"FrameId", PrintU32 });
             }
             return;
             case Intel_PresentMon::AppSimulationEnd_Info::Id: {
                 DebugAssert(eventRecord->UserDataLength == sizeof(Intel_PresentMon::AppSimulationEnd_Info_Props));
-                PrintEventHeader(eventRecord, metadata, "PM_AppSimulationEnd", { L"FrameId", PrintU32 });
+                PrintEventHeader(eventRecord, metadata, "PM_AppSimulationEnd", { (void*)L"FrameId", PrintU32 });
             }
             return;
             case Intel_PresentMon::AppRenderSubmitStart_Info::Id: {
                 DebugAssert(eventRecord->UserDataLength == sizeof(Intel_PresentMon::AppRenderSubmitStart_Info_Props));
-                PrintEventHeader(eventRecord, metadata, "PM_AppRenderSubmitStart", { L"FrameId", PrintU32 });
+                PrintEventHeader(eventRecord, metadata, "PM_AppRenderSubmitStart", { (void*)L"FrameId", PrintU32 });
             }
             return;
             case Intel_PresentMon::AppRenderSubmitEnd_Info::Id: {
                 DebugAssert(eventRecord->UserDataLength == sizeof(Intel_PresentMon::AppRenderSubmitEnd_Info_Props));
-                PrintEventHeader(eventRecord, metadata, "PM_AppRenderSubmitEnd", { L"FrameId", PrintU32 });
+                PrintEventHeader(eventRecord, metadata, "PM_AppRenderSubmitEnd", {(void*)L"FrameId", PrintU32 });
             }
             return;
             case Intel_PresentMon::AppPresentStart_Info::Id: {
                 DebugAssert(eventRecord->UserDataLength == sizeof(Intel_PresentMon::AppPresentStart_Info_Props));
-                PrintEventHeader(eventRecord, metadata, "PM_AppPresentStart", { L"FrameId", PrintU32 });
+                PrintEventHeader(eventRecord, metadata, "PM_AppPresentStart", { (void*)L"FrameId", PrintU32 });
             }
             return;
             case Intel_PresentMon::AppPresentEnd_Info::Id: {
                 DebugAssert(eventRecord->UserDataLength == sizeof(Intel_PresentMon::AppPresentEnd_Info_Props));
-                PrintEventHeader(eventRecord, metadata, "PM_AppPresentEnd", { L"FrameId", PrintU32 });
+                PrintEventHeader(eventRecord, metadata, "PM_AppPresentEnd", { (void*)L"FrameId", PrintU32 });
             }
             return;
             case Intel_PresentMon::AppInputSample_Info::Id: {
                 DebugAssert(eventRecord->UserDataLength == sizeof(Intel_PresentMon::AppInputSample_Info_Props));
-                PrintEventHeader(eventRecord, metadata, "PM_AppInputSample", { L"FrameId", PrintU32,
-                                                                               L"InputType", PrintInputType});
+                PrintEventHeader(eventRecord, metadata, "PM_AppInputSample", { (void*)L"FrameId", PrintU32,
+                                                                               (void*)L"InputType", PrintInputType});
             }
             return;
             }
@@ -743,11 +743,11 @@ void VerboseTraceEventImpl(PMTraceConsumer* pmConsumer, EVENT_RECORD* eventRecor
     if (hdr.ProviderId == NT_Process::GUID) {
         if (hdr.EventDescriptor.Opcode == EVENT_TRACE_TYPE_START ||
             hdr.EventDescriptor.Opcode == EVENT_TRACE_TYPE_DC_START) {
-            PrintEventHeader(eventRecord, metadata, "ProcessStart", { L"ProcessId",     PrintU32,
-                                                                      L"ImageFileName", PrintString, });
+            PrintEventHeader(eventRecord, metadata, "ProcessStart", { (void*)L"ProcessId",     PrintU32,
+                                                                      (void*)L"ImageFileName", PrintString, });
         } else if (hdr.EventDescriptor.Opcode == EVENT_TRACE_TYPE_END||
                    hdr.EventDescriptor.Opcode == EVENT_TRACE_TYPE_DC_END) {
-            PrintEventHeader(eventRecord, metadata, "ProcessStop",  { L"ProcessId",     PrintU32 });
+            PrintEventHeader(eventRecord, metadata, "ProcessStop",  { (void*)L"ProcessId",     PrintU32 });
         }
         return;
     }
@@ -755,9 +755,9 @@ void VerboseTraceEventImpl(PMTraceConsumer* pmConsumer, EVENT_RECORD* eventRecor
     if (hdr.ProviderId == Microsoft_Windows_Kernel_Process::GUID) {
         using namespace Microsoft_Windows_Kernel_Process;
         switch (hdr.EventDescriptor.Id) {
-        case ProcessStart_Start::Id: PrintEventHeader(eventRecord, metadata, "ProcessStart", { L"ProcessID", PrintU32,
-                                                                                               L"ImageName", PrintString, }); break;
-        case ProcessStop_Stop::Id:   PrintEventHeader(eventRecord, metadata, "ProcessStop",  { L"ProcessID", PrintU32 }); break;
+        case ProcessStart_Start::Id: PrintEventHeader(eventRecord, metadata, "ProcessStart", { (void*)L"ProcessID", PrintU32,
+                                                                                               (void*)L"ImageName", PrintString, }); break;
+        case ProcessStop_Stop::Id:   PrintEventHeader(eventRecord, metadata, "ProcessStop",  { (void*)L"ProcessID", PrintU32 }); break;
         }
         return;
     }
