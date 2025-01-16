@@ -12,7 +12,6 @@ find_package(cereal CONFIG REQUIRED)
 find_package(unofficial-concurrentqueue CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
-find_path(WINREG_INCLUDE_DIRS "winreg/WinReg.hpp")
 
 # PresentMon sources
 file(GLOB_RECURSE PRESENT_MON_SOURCES IntelPresentMon/**/*.cpp)
@@ -57,7 +56,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 target_include_directories(${PROJECT_NAME} PRIVATE
         IntelPresentMon/Interprocess/source # Required for metadata/EnumMetric.h
-        ${WINREG_INCLUDE_DIRS}
         $ENV{WindowsSdkDir}/Include/um
 )
 target_include_directories(${PROJECT_NAME} PUBLIC IntelPresentMon)
