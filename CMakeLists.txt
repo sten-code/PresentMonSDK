@@ -14,7 +14,7 @@ find_package(GTest CONFIG REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
 
 # PresentMon sources
-file(GLOB_RECURSE PRESENT_MON_SOURCES IntelPresentMon/**/*.cpp)
+file(GLOB_RECURSE PRESENT_MON_SOURCES IntelPresentMon/**/*.cpp PresentMon/*.cpp PresentData/*.cpp)
 add_library(${PROJECT_NAME} ${PRESENT_MON_SOURCES})
 add_definitions(-DPRESENTMONAPI2_EXPORTS)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")

@@ -25,15 +25,6 @@ const char* PresentModeToString(PresentMode mode)
     }
 }
 
-const char* RuntimeToString(Runtime rt)
-{
-    switch (rt) {
-    case Runtime::DXGI: return "DXGI";
-    case Runtime::D3D9: return "D3D9";
-    default: return "Other";
-    }
-}
-
 // If frame type debug is necessary uncomment
 // the following line. If we want to have
 // this based on _DEBUG we will need to double

@@ -1,6 +1,7 @@
 // Copyright (C) 2017-2024 Intel Corporation
 // SPDX-LICENSE-Identifier: MIT
 
+#define UNICODE
 #include "PresentMon.hpp"
 
 enum {
