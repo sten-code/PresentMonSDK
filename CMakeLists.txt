@@ -26,22 +26,22 @@ endif()
 
 # Generate EnumMetric.h
 add_custom_command(
-        OUTPUT ${CMAKE_SOURCE_DIR}/IntelPresentMon/Interprocess/source/metadata/EnumMetric.h
-        COMMAND ${CMAKE_COMMAND} -E env "PATH=$ENV{PATH}" ${CMAKE_SOURCE_DIR}/generate/awk.exe -f ${CMAKE_SOURCE_DIR}/generate/metrics.awk ${CMAKE_SOURCE_DIR}/generate/metrics.csv > ${CMAKE_SOURCE_DIR}/IntelPresentMon/Interprocess/source/metadata/EnumMetric.h
-        DEPENDS ${CMAKE_SOURCE_DIR}/generate/metrics.awk ${CMAKE_SOURCE_DIR}/generate/metrics.csv
+        OUTPUT ${PROJECT_SOURCE_DIR}/IntelPresentMon/Interprocess/source/metadata/EnumMetric.h
+        COMMAND ${CMAKE_COMMAND} -E env "PATH=$ENV{PATH}" ${PROJECT_SOURCE_DIR}/generate/awk.exe -f ${PROJECT_SOURCE_DIR}/generate/metrics.awk ${PROJECT_SOURCE_DIR}/generate/metrics.csv > ${PROJECT_SOURCE_DIR}/IntelPresentMon/Interprocess/source/metadata/EnumMetric.h
+        DEPENDS ${PROJECT_SOURCE_DIR}/generate/metrics.awk ${PROJECT_SOURCE_DIR}/generate/metrics.csv
         COMMENT "Generating EnumMetric.h"
 )
-add_custom_target(generate_enum_metric DEPENDS ${CMAKE_SOURCE_DIR}/IntelPresentMon/Interprocess/source/metadata/EnumMetric.h)
+add_custom_target(generate_enum_metric DEPENDS ${PROJECT_SOURCE_DIR}/IntelPresentMon/Interprocess/source/metadata/EnumMetric.h)
 
 # Generate build_id.h
 add_custom_command(
-        OUTPUT ${CMAKE_SOURCE_DIR}/IntelPresentMon/Versioning/generated/build_id.h
-        COMMAND ${CMAKE_COMMAND} -E env "PATH=$ENV{PATH}" cmd /c ${CMAKE_SOURCE_DIR}/IntelPresentMon/Versioning/scripts/pre-build.bat
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/IntelPresentMon/Versioning
-        DEPENDS ${CMAKE_SOURCE_DIR}/IntelPresentMon/Versioning/scripts/pre-build.bat
+        OUTPUT ${PROJECT_SOURCE_DIR}/IntelPresentMon/Versioning/generated/build_id.h
+        COMMAND ${CMAKE_COMMAND} -E env "PATH=$ENV{PATH}" cmd /c ${PROJECT_SOURCE_DIR}/IntelPresentMon/Versioning/scripts/pre-build.bat
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/IntelPresentMon/Versioning
+        DEPENDS ${PROJECT_SOURCE_DIR}/IntelPresentMon/Versioning/scripts/pre-build.bat
         COMMENT "Running pre-build script to generate build_id.h"
 )
-add_custom_target(generate_build_id DEPENDS ${CMAKE_SOURCE_DIR}/IntelPresentMon/Versioning/generated/build_id.h)
+add_custom_target(generate_build_id DEPENDS ${PROJECT_SOURCE_DIR}/IntelPresentMon/Versioning/generated/build_id.h)
 add_dependencies(${PROJECT_NAME} generate_enum_metric generate_build_id)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
